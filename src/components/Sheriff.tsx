@@ -5,12 +5,19 @@ export const Sheriff: React.FC<{status: number}> = ({status})  => {
     const [count, setcount] = useState<number>(status);
     const [posX, setposX] = useState<number>(status);
     // console.log('SHERIFF RENDER NR: ', count);
-    // console.log('CURRENT POSITION X: ', posX);  
+    // console.log('CURRENT POSITION X: ', posX);
+    
+    // const boardDiv = document.querySelector('.board');
+    // console.log(boardDiv);
+    // const boardWidth = boardDiv.getBoundingClientRect().width;
+    // const boardWidth = 111;
+    // console.log('BOARD WIDTH WHEN SHERIFF RENDERED: ', boardWidth);  
     
     const moveLeft = (x: number) =>  setposX(posX => posX - x);
     const moveRight = (x: number) => setposX(posX => posX + x);
     
     function handleKeyPress(e: any) {
+
         const { key } = e;  //instead of e.key
         const increment = 50;
         console.log('key: ', key);        
