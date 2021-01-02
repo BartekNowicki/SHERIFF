@@ -1,19 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import './sheriff.scss';
+import React, { useState, useEffect, useRef } from 'react';
+import { ReactComponent as PlaneSvgComponent } from "../assets/plane.svg";
+import { Bullet } from './Bullet';
+
+import './bullet.scss';
 
 export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({status, wrapperWidth})  => {
-    const [count, setcount] = useState<number>(status);
-    const [deltaX, setDeltaX] = useState<number>(status);
+    const [sheriffClickCount, setSheriffClickCount] = useState<number>(status);
+    const data = useRef({boardWidth: 0, boardHeight: 0, sheriffWidth: 0, deltaIncrement: 0, maxDeltaX: 0, bulletCount: 0});
+    const [deltaX, setDeltaX] = useState<number>(0);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [canMove, setcanMove] = useState<string>('canMoveOn');
     //canMoveOf will disable moving - not used yet, only set up in key press handler
 
-    const getWidth = (selector: string) => {
+    const [bulletsArray, setBulletsArray] = useState<Array<JSX.Element>>([]);
+    
+    // const [bulletsArray, setBulletsArray] = useState<Array<JSX.Element>>([<Bullet key = {data.current.bulletCount} nr = {data.current.bulletCount} boardHeight = {data.current.boardHeight} sheriffWidth = {data.current.sheriffWidth} sheriffDeltaX = {deltaX}/>]);
+    
+    const getDimentions = (selector: string) => {
         const el = document.querySelector(selector);
         if (!el) {
             throw new Error('ERROR READING ELEMENT!');
         }
         // console.log('HERE IS THE WIDTH: ', el.getBoundingClientRect().width);
-        return el.getBoundingClientRect().width;     
+        return {width: el.getBoundingClientRect().width, height: el.getBoundingClientRect().height};     
     }
     
     const getClassNames = (selector: string) => {
@@ -24,48 +33,56 @@ export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({statu
         return el.className;   
     }
 
-    const performMeasurements = () => {
+    const performMeasurements = () => {        
         if (document.querySelector('.board')) {
-            boardWidth = Math.round(getWidth('.board'));
-            sheriffWidth = Math.round(boardWidth / 8);
-            deltaIncrement = sheriffWidth;
-            maxDeltaX = Math.round(boardWidth / 2 - sheriffWidth / 2);
+            const boardWidth = Math.round(getDimentions('.board').width);
+            data.current.boardWidth = boardWidth;
+            const boardHeight = Math.round(getDimentions('.board').height);
+            data.current.boardHeight = boardHeight;
+            const sheriffWidth = Math.round(boardWidth / 8);
+            data.current.sheriffWidth = sheriffWidth;
+            const deltaIncrement = sheriffWidth;
+            data.current.deltaIncrement = deltaIncrement;
+            const maxDeltaX = Math.round(boardWidth / 2 - sheriffWidth / 2);
+            data.current.maxDeltaX = maxDeltaX;
         } else {
             console.warn('BOARD NOT DETECTED!');
         }
+        
     }
     
     console.log('SHERIFF RENDERED');
-    // console.log('CURRENT POSITION X: ', posX);
-    // console.log('PROPS WRAPPER WIDTH: ', wrapperWidth);  
-    
-    let deltaIncrement = 0;
-    let boardWidth = 0;
-    let sheriffWidth = 0;
-    let maxDeltaX = 0;
-    performMeasurements();  
-    
-    // console.log('BOARD WIDTH WHEN SHERIFF (RE)RENDERED: ', boardWidth);
-    // console.log('DELTA X: ', deltaX);
-    // console.log('DELTA X abs: ', Math.abs(deltaX));
-    // console.log('MAX DELTA X: ', maxDeltaX);  
         
-    const moveLeft = (x: number) => setDeltaX(deltaX => Math.max(deltaX - x, -maxDeltaX));
-    const moveRight = (x: number) => setDeltaX(deltaX => Math.min(deltaX + x, maxDeltaX));  
+    const moveLeft = (x: number) => setDeltaX(deltaX => Math.max(deltaX - x, -data.current.maxDeltaX));
+    const moveRight = (x: number) => setDeltaX(deltaX => Math.min(deltaX + x, data.current.maxDeltaX));  
+
+    const shoot = () => {
+        const newBullet = <Bullet key = {data.current.bulletCount} nr = {data.current.bulletCount} boardHeight = {data.current.boardHeight} sheriffWidth = {data.current.sheriffWidth} sheriffDeltaX = {deltaX}/>
+
+        // const [bulletsArray, setBulletsArray] = useState<Array<JSX.Element>>([<Bullet key = {data.current.bulletCount} nr = {data.current.bulletCount} boardHeight = {data.current.boardHeight} sheriffWidth = {data.current.sheriffWidth} sheriffDeltaX = {deltaX}/>]);
+        
+        setBulletsArray([...bulletsArray, newBullet]);
+        console.log('BULLETS ARRAY: ', bulletsArray);
+        data.current.bulletCount = data.current.bulletCount +1;
+        console.log('BULLET COUNT: ', data.current.bulletCount);
+    }
     
     const handleKeyPress = (e: KeyboardEvent) => {
         
-        console.log('CLASSNAME INSIDE HANDLER: ', getClassNames('.sheriffDiv'));
+        // console.log('CLASSNAME INSIDE HANDLER: ', getClassNames('.sheriffDiv'));
         if (getClassNames('.sheriffDiv').includes('canMoveOff')) return
 
         const { key } = e;  //instead of e.key
         // console.log('key: ', key);        
             switch (key) {
                 case 'ArrowLeft':
-                    moveLeft(deltaIncrement); 
+                    moveLeft(data.current.deltaIncrement); 
                 break;
                 case 'ArrowRight':
-                    moveRight(deltaIncrement); 
+                    moveRight(data.current.deltaIncrement); 
+                break;
+                case ' ': //SPACE BAR
+                    shoot(); 
                 break;
                       
                 default:
@@ -78,38 +95,48 @@ export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({statu
         // console.log('CONTROLSLISTENER ASSIGNED');
         //cleanup to remove listener before re-rendering not necessary if empty dependency []
         //cleanup would look like so:
-        //return window.removeEventListener('keyup', handleKeyPress);    
+        //return window.removeEventListener('keyup', handleKeyPress);
+        performMeasurements();       
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);    
 
-    useEffect(() => {
-        performMeasurements();        
-        console.log(`USEEFFECT ON KEY PRESS: ${canMove} dX: ${deltaX} mdX: ${maxDeltaX}`);        
+    useEffect(() => {        
+        console.log(`USEEFFECT ON KEY PRESS: ${canMove} dX: ${deltaX}`);        
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [handleKeyPress]);   
 
     // useEffect(() => {
     //     // console.log('USEEFFECT ON DELTAX CHANGE');        
-    // }, [deltaX]);   
+    // }, [deltaX]); 
+
+    useEffect(() => {
+        console.log('USEEFFECT ON BULLETSARRAY CHANGE');        
+    }, [bulletsArray]); 
+    
+    
 
     const handleClick = () => {
-        setcount(count => count + 1);
-        console.log(`SHERIFF CLICKED, INCREASING CLICK COUNT TO: ${count}`);
+        setSheriffClickCount(sheriffClickCount => sheriffClickCount + 1);
+        console.log(`SHERIFF CLICKED, INCREASING CLICK COUNT TO: ${sheriffClickCount}`);
     }   
 
     const sheriffStyle = {
         transform: `translateX(${deltaX}px)`,
-        width: `${sheriffWidth}px`,
-        height: `${sheriffWidth}px`,
-        padding: `5px`
+        width: `${data.current.sheriffWidth}px`,
+        height: `${data.current.sheriffWidth}px`,
+        padding: `1px`,
     };
     
     const sheriffClassNames = ['sheriffDiv', `${canMove}`];
-
-
+    
     return (
-        <div className={sheriffClassNames.join(' ')} style = {sheriffStyle} onClick = {() => handleClick()}>
-          <p>{count} : {deltaX} : {deltaIncrement} : {canMove}</p>
+        <>
+        {bulletsArray}
+        <div className={sheriffClassNames.join(' ')} style = {sheriffStyle} onClick = {() => handleClick()}> <PlaneSvgComponent className="planeSvg" />           
         </div>
+        </>
     )
 }
+
 
 
