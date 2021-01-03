@@ -6,16 +6,19 @@ import './bullet.scss';
 
 export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({status, wrapperWidth})  => {
     const [sheriffClickCount, setSheriffClickCount] = useState<number>(status);
-    const data = useRef({boardWidth: 0, boardHeight: 0, sheriffWidth: 0, deltaIncrement: 0, maxDeltaX: 0, bulletCount: 0});
+
+    const data = useRef({boardWidth: 0, boardHeight: 0, sheriffWidth: 0, deltaIncrement: 0, deltaX: 0, maxDeltaX: 0, bulletCount: 0, inMotion: false});
+    
     const [deltaX, setDeltaX] = useState<number>(0);
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const [canMove, setcanMove] = useState<string>('canMoveOn');
     //canMoveOf will disable moving - not used yet, only set up in key press handler
 
     const [bulletsArray, setBulletsArray] = useState<Array<JSX.Element>>([]);
-    
-    // const [bulletsArray, setBulletsArray] = useState<Array<JSX.Element>>([<Bullet key = {data.current.bulletCount} nr = {data.current.bulletCount} boardHeight = {data.current.boardHeight} sheriffWidth = {data.current.sheriffWidth} sheriffDeltaX = {deltaX}/>]);
-    
+    const bulletsRef = useRef<Array<JSX.Element>>(bulletsArray);
+        
     const getDimentions = (selector: string) => {
         const el = document.querySelector(selector);
         if (!el) {
@@ -41,7 +44,8 @@ export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({statu
             data.current.boardHeight = boardHeight;
             const sheriffWidth = Math.round(boardWidth / 8);
             data.current.sheriffWidth = sheriffWidth;
-            const deltaIncrement = sheriffWidth;
+            // const deltaIncrement = sheriffWidth;
+            const deltaIncrement = 10;
             data.current.deltaIncrement = deltaIncrement;
             const maxDeltaX = Math.round(boardWidth / 2 - sheriffWidth / 2);
             data.current.maxDeltaX = maxDeltaX;
@@ -50,21 +54,36 @@ export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({statu
         }
         
     }
-    
-    console.log('SHERIFF RENDERED');
         
-    const moveLeft = (x: number) => setDeltaX(deltaX => Math.max(deltaX - x, -data.current.maxDeltaX));
-    const moveRight = (x: number) => setDeltaX(deltaX => Math.min(deltaX + x, data.current.maxDeltaX));  
+    const move = (direction: string, x: number) => {
+        data.current.inMotion = true;
 
+        if (direction === 'left' ){
+            setDeltaX(deltaX => Math.max(deltaX - x, -data.current.maxDeltaX));
+            data.current.deltaX = Math.max(data.current.deltaX - x, -data.current.maxDeltaX)
+            // console.log('DELTAX INSIDE MOVELEFT: ', data.current.deltaX);
+            data.current.inMotion = false;
+        } else {
+            setDeltaX(deltaX => Math.min(deltaX + x, data.current.maxDeltaX));
+            data.current.deltaX = Math.min(data.current.deltaX + x, data.current.maxDeltaX);
+            data.current.inMotion = false;
+        }
+    }
+        
     const shoot = () => {
-        const newBullet = <Bullet key = {data.current.bulletCount} nr = {data.current.bulletCount} boardHeight = {data.current.boardHeight} sheriffWidth = {data.current.sheriffWidth} sheriffDeltaX = {deltaX}/>
-
-        // const [bulletsArray, setBulletsArray] = useState<Array<JSX.Element>>([<Bullet key = {data.current.bulletCount} nr = {data.current.bulletCount} boardHeight = {data.current.boardHeight} sheriffWidth = {data.current.sheriffWidth} sheriffDeltaX = {deltaX}/>]);
+        data.current.bulletCount = data.current.bulletCount + 1;        
+        const newBullet = <Bullet key = {data.current.bulletCount} nr = {data.current.bulletCount} boardHeight = {data.current.boardHeight} sheriffWidth = {data.current.sheriffWidth} sheriffDeltaX = {data.current.deltaX}/>
         
-        setBulletsArray([...bulletsArray, newBullet]);
-        console.log('BULLETS ARRAY: ', bulletsArray);
-        data.current.bulletCount = data.current.bulletCount +1;
-        console.log('BULLET COUNT: ', data.current.bulletCount);
+        bulletsRef.current.push(newBullet);
+        // console.log('BULLETSREF: ', bulletsRef.current);
+        
+        console.log('BULLETS ARRAY BEFORE NEW BULLET: ', bulletsArray);
+        // THIS WILL NOT WORK, IT WILL MAKE ANOTHER BULLET WITH THE SAME KEY:
+        // setBulletsArray([...bulletsArray, newBullet]);
+        setBulletsArray([...bulletsRef.current]);
+
+        // console.log('BULLETS ARRAY AFTER NEW BULLET: ', bulletsArray);
+        // console.log('BULLET COUNT: ', data.current.bulletCount);
     }
     
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -76,10 +95,10 @@ export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({statu
         // console.log('key: ', key);        
             switch (key) {
                 case 'ArrowLeft':
-                    moveLeft(data.current.deltaIncrement); 
+                    move('left', data.current.deltaIncrement); 
                 break;
                 case 'ArrowRight':
-                    moveRight(data.current.deltaIncrement); 
+                    move('right', data.current.deltaIncrement); 
                 break;
                 case ' ': //SPACE BAR
                     shoot(); 
@@ -101,9 +120,10 @@ export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({statu
     }, []);    
 
     useEffect(() => {        
-        console.log(`USEEFFECT ON KEY PRESS: ${canMove} dX: ${deltaX}`);        
+    // console.log(`USEEFFECT ON KEY PRESS: ${canMove} dX: ${deltaX}`);        
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [handleKeyPress]);   
+    // }, [handleKeyPress]);   
+}, []);
 
     // useEffect(() => {
     //     // console.log('USEEFFECT ON DELTAX CHANGE');        
@@ -131,6 +151,7 @@ export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({statu
     
     return (
         <>
+        {console.log('SHERIFF RENDERED')}
         {bulletsArray}
         <div className={sheriffClassNames.join(' ')} style = {sheriffStyle} onClick = {() => handleClick()}> <PlaneSvgComponent className="planeSvg" />           
         </div>
