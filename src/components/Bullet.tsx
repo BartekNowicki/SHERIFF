@@ -1,25 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { ReactComponent as BulletSvgComponent } from "../assets/bullet.svg";
 
-export const Bullet: React.FC<{nr: number, boardHeight: number, sheriffWidth: number, sheriffDeltaX: number}> = ({nr, boardHeight, sheriffWidth, sheriffDeltaX})  => {
-    // const data = useRef({boardHeight: boardHeight, bulletWidth: 0, posY: 0});
+export const Bullet: React.FC<{nr: number, sheriffWidth: number, domNodeGetter(x: any): any}> = ({nr, sheriffWidth, domNodeGetter})  => {
     
-
-    const bulletStyle = {
+    let bulletStyle = {
         width: `${sheriffWidth / 5}px`,
-        transform: `translateX(${sheriffDeltaX}px)`,
-        bottom: `${sheriffWidth}px`,
+        bottom: `${sheriffWidth + 25}px`,
     };
 
+    const sendNodeRefToParent = (element: HTMLDivElement | null) => domNodeGetter(element);
+    
     return (
         <>
-        {console.log(`BULLET ${nr} RENDERED ON BOARD ${boardHeight} HIGH`)}        
-        <div className="bulletDiv" style = {bulletStyle}>
+        {console.log(`BULLET ${nr} RENDERED`)} 
+        
+        <div ref={el => {sendNodeRefToParent(el)}} className="bulletDiv" style = {bulletStyle} data-type = 'bullet'>
             <BulletSvgComponent className="bulletSvg" />           
-        </div>
+        </div>        
         </>
     )
 }
-
-
-

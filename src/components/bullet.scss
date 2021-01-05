@@ -1,10 +1,7 @@
 .bulletDiv {
     // border: 1px solid red;
-    position: absolute;    
-    animation: shoot 3s linear backwards;
-    animation-delay: 100ms;
-    bottom: 10%;
     opacity: 0;
+    position: absolute;    
 }
 
 .bulletSvg {
@@ -14,19 +11,4 @@
     & g {
         fill: green;
     }    
-}
-
-@keyframes shoot {
-    0% { 
-        bottom: 10%;
-        opacity: 0;
-    }
-    1% { 
-        bottom: 10%;
-        opacity: 1;
-    }
-    100% { 
-        bottom: 100%;
-        opacity: 1;
-    }
 }

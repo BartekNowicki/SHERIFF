@@ -1,10 +1,14 @@
+import gsap from 'gsap';
 import React, { useState, useEffect, useRef } from 'react';
 import { ReactComponent as PlaneSvgComponent } from "../assets/plane.svg";
 import { Bullet } from './Bullet';
 
 import './bullet.scss';
 
-export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({status, wrapperWidth})  => {
+export const Sheriff: React.FC<{
+    status: number, 
+    wrapperWidth: number}> = ({status, wrapperWidth})  => {
+
     const [sheriffClickCount, setSheriffClickCount] = useState<number>(status);
 
     const data = useRef({boardWidth: 0, boardHeight: 0, sheriffWidth: 0, deltaIncrement: 0, deltaX: 0, maxDeltaX: 0, bulletCount: 0, inMotion: false});
@@ -12,12 +16,11 @@ export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({statu
     const [deltaX, setDeltaX] = useState<number>(0);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
     const [canMove, setcanMove] = useState<string>('canMoveOn');
     //canMoveOf will disable moving - not used yet, only set up in key press handler
 
     const [bulletsArray, setBulletsArray] = useState<Array<JSX.Element>>([]);
-    const bulletsRef = useRef<Array<JSX.Element>>(bulletsArray);
+    const bulletsRefs = useRef<Array<JSX.Element>>(bulletsArray);
         
     const getDimentions = (selector: string) => {
         const el = document.querySelector(selector);
@@ -45,7 +48,7 @@ export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({statu
             const sheriffWidth = Math.round(boardWidth / 8);
             data.current.sheriffWidth = sheriffWidth;
             // const deltaIncrement = sheriffWidth;
-            const deltaIncrement = 10;
+            const deltaIncrement = 40;
             data.current.deltaIncrement = deltaIncrement;
             const maxDeltaX = Math.round(boardWidth / 2 - sheriffWidth / 2);
             data.current.maxDeltaX = maxDeltaX;
@@ -69,18 +72,50 @@ export const Sheriff: React.FC<{status: number, wrapperWidth: number}> = ({statu
             data.current.inMotion = false;
         }
     }
+
+    const bulletTimeline = () =>  gsap.timeline();
+
+    const animateBullet = (el: HTMLDivElement) => {
+        // console.log(el.dataset.type);
+        // el.style.border = '10px solid yellow';
+       
+        const tl = bulletTimeline();
+
+        tl.set(el,  {transformOrigin: '50% 0%', x: data.current.deltaX});
+
+        tl.to(el, {opacity: 1, duration: 0}).delay(0.5);
+
+        tl.to(el, {bottom: '100%', duration: 2, onComplete: () => {
+            bulletsRefs.current.shift();
+            setBulletsArray([...bulletsRefs.current]);
+         }}).delay(0);
         
-    const shoot = () => {
+        // console.log(window.getComputedStyle(el).getPropertyValue("bottom"));
+        
+    }
+
+    const getDomNodeFromChild = (el: HTMLDivElement | null): void => {
+        console.log('SHERRIF RECEIVED BULLET NODE: ', el);
+        if (el) {
+            if (el.dataset.type === 'bullet') {
+                // console.log(el.dataset.type);
+                animateBullet(el);
+            }
+        }
+    }
+
+    const shoot = () => {     
+
         data.current.bulletCount = data.current.bulletCount + 1;        
-        const newBullet = <Bullet key = {data.current.bulletCount} nr = {data.current.bulletCount} boardHeight = {data.current.boardHeight} sheriffWidth = {data.current.sheriffWidth} sheriffDeltaX = {data.current.deltaX}/>
-        
-        bulletsRef.current.push(newBullet);
-        // console.log('BULLETSREF: ', bulletsRef.current);
+        const newBullet = <Bullet key = {data.current.bulletCount} nr = {data.current.bulletCount} sheriffWidth = {data.current.sheriffWidth} domNodeGetter = {getDomNodeFromChild}/>
+                
+        bulletsRefs.current.push(newBullet);
+        // console.log('BULLETSREF: ', bulletsRefs.current);
         
         console.log('BULLETS ARRAY BEFORE NEW BULLET: ', bulletsArray);
         // THIS WILL NOT WORK, IT WILL MAKE ANOTHER BULLET WITH THE SAME KEY:
         // setBulletsArray([...bulletsArray, newBullet]);
-        setBulletsArray([...bulletsRef.current]);
+        setBulletsArray([...bulletsRefs.current]);
 
         // console.log('BULLETS ARRAY AFTER NEW BULLET: ', bulletsArray);
         // console.log('BULLET COUNT: ', data.current.bulletCount);
