@@ -11,9 +11,9 @@ export const Sheriff: React.FC<{
 
     const [sheriffClickCount, setSheriffClickCount] = useState<number>(status);
 
-    const data = useRef({boardWidth: 0, boardHeight: 0, sheriffWidth: 0, deltaIncrement: 0, deltaX: 0, maxDeltaX: 0, bulletCount: 0, inMotion: false});
+    const data = useRef({boardWidth: 0, boardHeight: 0, sheriffWidth: 0, deltaIncrement: 0, deltaX: 0, maxDeltaX: 0, bulletCount: 0, inMotionLeft: false, inMotionRight: false});
     
-    const [deltaX, setDeltaX] = useState<number>(0);
+    // UNUSED const [deltaX, setDeltaX] = useState<number>(0);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [canMove, setcanMove] = useState<string>('canMoveOn');
@@ -21,7 +21,7 @@ export const Sheriff: React.FC<{
 
     const [bulletsArray, setBulletsArray] = useState<Array<JSX.Element>>([]);
     const bulletsRefs = useRef<Array<JSX.Element>>(bulletsArray);
-        
+    
     const getDimentions = (selector: string) => {
         const el = document.querySelector(selector);
         if (!el) {
@@ -39,6 +39,11 @@ export const Sheriff: React.FC<{
         return el.className;   
     }
 
+    const bulletTimeline = (): gsap.core.Timeline => gsap.timeline({ paused: false, ease: "none" });
+    const sherrifTimeline = (): gsap.core.Timeline => gsap.timeline({ paused: true, ease: "none" });
+    const tlLeft = sherrifTimeline();
+    const tlRight = sherrifTimeline();
+
     const performMeasurements = () => {        
         if (document.querySelector('.board')) {
             const boardWidth = Math.round(getDimentions('.board').width);
@@ -48,64 +53,84 @@ export const Sheriff: React.FC<{
             const sheriffWidth = Math.round(boardWidth / 8);
             data.current.sheriffWidth = sheriffWidth;
             // const deltaIncrement = sheriffWidth;
-            const deltaIncrement = 40;
+            const deltaIncrement = 20;
             data.current.deltaIncrement = deltaIncrement;
             const maxDeltaX = Math.round(boardWidth / 2 - sheriffWidth / 2);
             data.current.maxDeltaX = maxDeltaX;
         } else {
             console.warn('BOARD NOT DETECTED!');
-        }
-        
-    }
-        
-    const move = (direction: string, x: number) => {
-        data.current.inMotion = true;
-
-        if (direction === 'left' ){
-            setDeltaX(deltaX => Math.max(deltaX - x, -data.current.maxDeltaX));
-            data.current.deltaX = Math.max(data.current.deltaX - x, -data.current.maxDeltaX)
-            // console.log('DELTAX INSIDE MOVELEFT: ', data.current.deltaX);
-            data.current.inMotion = false;
-        } else {
-            setDeltaX(deltaX => Math.min(deltaX + x, data.current.maxDeltaX));
-            data.current.deltaX = Math.min(data.current.deltaX + x, data.current.maxDeltaX);
-            data.current.inMotion = false;
-        }
+        }        
     }
 
-    const bulletTimeline = () =>  gsap.timeline();
+    const clearSheriffMotion = () => {
+        data.current.inMotionLeft = false;
+        data.current.inMotionRight = false;
+    }
+    
+    const move = (direction: string, increment: number) => {
+     
+        clearSheriffMotion();    
+        direction === 'left'
+        ? data.current.inMotionLeft = true
+        : data.current.inMotionRight = true;
+        // console.log('LEFT: ', data.current.inMotionLeft, 'RIGHT', data.current.inMotionRight);
+        // console.log('MOVING: ', sherriffRef);
+        
+        const el = sherriffRef;
+        
+        if (el) {
+            if(data.current.inMotionLeft) {
+                
+                tlLeft.play();
+                // console.log('DELTA X: ', data.current.deltaX);
+                const newDeltaX = Math.max(data.current.deltaX - data.current.deltaIncrement, -data.current.maxDeltaX);
+                tlLeft.fromTo(el, {x: data.current.deltaX}, {x: newDeltaX, duration: 0.1, onComplete: () => { 
+                // console.log('DONE MOVING LEFT');                
+                data.current.deltaX = newDeltaX;
+                // console.log('NEW DELTA X: ', data.current.deltaX, data.current.maxDeltaX);
+                    //MOVE LEFT AGAIN
+                    if (data.current.inMotionLeft && Math.abs(data.current.deltaX) < Math.abs(data.current.maxDeltaX)) {
+                        move('left', data.current.deltaIncrement);
+                    }
 
+                }}).delay(0);
+            } else if(data.current.inMotionRight) {
+                tlRight.play();
+                // console.log('DELTA X: ', data.current.deltaX);
+                const newDeltaX = Math.min(data.current.deltaX + data.current.deltaIncrement, data.current.maxDeltaX);
+                tlRight.fromTo(el, {x: data.current.deltaX}, {x: newDeltaX, duration: 0.1, onComplete: () => { 
+                // console.log('DONE MOVING RIGHT');                
+                data.current.deltaX = newDeltaX;
+                // console.log('NEW DELTA X: ', data.current.deltaX);
+                    //MOVE RIGHT AGAIN
+                    if (data.current.inMotionRight && Math.abs(data.current.deltaX) < Math.abs(data.current.maxDeltaX)) {
+                        move('right', data.current.deltaIncrement);
+                    }
+                }}).delay(0);
+            }
+        }
+    }
+    
     const animateBullet = (el: HTMLDivElement) => {
-        // console.log(el.dataset.type);
-        // el.style.border = '10px solid yellow';
-       
         const tl = bulletTimeline();
-
         tl.set(el,  {transformOrigin: '50% 0%', x: data.current.deltaX});
-
         tl.to(el, {opacity: 1, duration: 0}).delay(0.5);
-
         tl.to(el, {bottom: '100%', duration: 2, onComplete: () => {
             bulletsRefs.current.shift();
             setBulletsArray([...bulletsRefs.current]);
          }}).delay(0);
-        
-        // console.log(window.getComputedStyle(el).getPropertyValue("bottom"));
-        
     }
 
     const getDomNodeFromChild = (el: HTMLDivElement | null): void => {
         console.log('SHERRIF RECEIVED BULLET NODE: ', el);
         if (el) {
             if (el.dataset.type === 'bullet') {
-                // console.log(el.dataset.type);
                 animateBullet(el);
             }
         }
     }
 
-    const shoot = () => {     
-
+    const shoot = () => {        
         data.current.bulletCount = data.current.bulletCount + 1;        
         const newBullet = <Bullet key = {data.current.bulletCount} nr = {data.current.bulletCount} sheriffWidth = {data.current.sheriffWidth} domNodeGetter = {getDomNodeFromChild}/>
                 
@@ -130,10 +155,14 @@ export const Sheriff: React.FC<{
         // console.log('key: ', key);        
             switch (key) {
                 case 'ArrowLeft':
-                    move('left', data.current.deltaIncrement); 
+                    if (tlLeft.isActive() === false) {
+                        move('left', data.current.deltaIncrement);
+                    }
                 break;
                 case 'ArrowRight':
-                    move('right', data.current.deltaIncrement); 
+                    if (tlRight.isActive() === false) {
+                        move('right', data.current.deltaIncrement);
+                    }
                 break;
                 case ' ': //SPACE BAR
                     shoot(); 
@@ -150,7 +179,9 @@ export const Sheriff: React.FC<{
         //cleanup to remove listener before re-rendering not necessary if empty dependency []
         //cleanup would look like so:
         //return window.removeEventListener('keyup', handleKeyPress);
-        performMeasurements();       
+        performMeasurements();
+        
+               
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);    
 
@@ -176,23 +207,28 @@ export const Sheriff: React.FC<{
     }   
 
     const sheriffStyle = {
-        transform: `translateX(${deltaX}px)`,
+        // transform: `translateX(${deltaX}px)`,
         width: `${data.current.sheriffWidth}px`,
         height: `${data.current.sheriffWidth}px`,
         padding: `1px`,
     };
     
     const sheriffClassNames = ['sheriffDiv', `${canMove}`];
+
+    let sherriffRef: HTMLDivElement | null;
+    const rememberMyRef = (myRef: HTMLDivElement | null) => {
+        if (myRef) {
+            sherriffRef = myRef;
+            // console.log('MY REF IS: ', sherriffRef);
+        } 
+    }
     
     return (
         <>
         {console.log('SHERIFF RENDERED')}
         {bulletsArray}
-        <div className={sheriffClassNames.join(' ')} style = {sheriffStyle} onClick = {() => handleClick()}> <PlaneSvgComponent className="planeSvg" />           
+        <div ref={element => {rememberMyRef(element)}} className={sheriffClassNames.join(' ')} style = {sheriffStyle} onClick = {() => handleClick()}> <PlaneSvgComponent className="planeSvg" />           
         </div>
         </>
     )
 }
-
-
-
