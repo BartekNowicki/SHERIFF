@@ -1,0 +1,11 @@
+.panel {
+    display: flex;
+    justify-content: center;
+    background-color: rgba(51, 160, 1, 0.8);
+    border: 10px solid transparent;
+    color: rgba(255, 255, 255, 0.7);
+    & p {
+        font-size: 5vmin;
+        padding: 2vmin;
+    }
+}

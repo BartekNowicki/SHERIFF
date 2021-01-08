@@ -12,7 +12,7 @@ export const Bullet: React.FC<{nr: number, sheriffWidth: number, domNodeGetter(x
     
     return (
         <>
-        {console.log(`BULLET ${nr} RENDERED`)} 
+        {/* {console.log(`BULLET ${nr} RENDERED`)} */}
         
         <div ref={el => {sendNodeRefToParent(el)}} className="bulletDiv" style = {bulletStyle} data-type = 'bullet'>
             <BulletSvgComponent className="bulletSvg" />           

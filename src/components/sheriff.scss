@@ -3,6 +3,7 @@
     position: absolute;
     bottom: 10px;
     transition: 0.1s linear;
+    align-self: center; //IMPORTANT AS TOP DIVS ARE STRETCH
 }
 
 .planeSvg {

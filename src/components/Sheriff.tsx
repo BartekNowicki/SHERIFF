@@ -44,7 +44,13 @@ export const Sheriff: React.FC<{
     const tlLeft = sherrifTimeline();
     const tlRight = sherrifTimeline();
 
-    const performMeasurements = () => {        
+    const setCssVariables = (value: number) => {
+        document.documentElement.style.setProperty('--targetWidthFromJs', `${value / 4}px`);
+        console.log('targetWidthFromJs: ', getComputedStyle(document.documentElement).getPropertyValue('--targetWidthFromJs'));
+    }
+
+    const performMeasurements = () => {
+        //QUERYSELECTOR IS NOT REALLY REQUIRED AS THE BOARD INLINE STYLE IS 98% OFWRAPPER :)      
         if (document.querySelector('.board')) {
             const boardWidth = Math.round(getDimentions('.board').width);
             data.current.boardWidth = boardWidth;
@@ -57,6 +63,7 @@ export const Sheriff: React.FC<{
             data.current.deltaIncrement = deltaIncrement;
             const maxDeltaX = Math.round(boardWidth / 2 - sheriffWidth / 2);
             data.current.maxDeltaX = maxDeltaX;
+            setCssVariables(boardWidth);
         } else {
             console.warn('BOARD NOT DETECTED!');
         }        
@@ -122,7 +129,7 @@ export const Sheriff: React.FC<{
     }
 
     const getDomNodeFromChild = (el: HTMLDivElement | null): void => {
-        console.log('SHERRIF RECEIVED BULLET NODE: ', el);
+        // console.log('SHERRIF RECEIVED BULLET NODE: ', el);
         if (el) {
             if (el.dataset.type === 'bullet') {
                 animateBullet(el);
@@ -137,7 +144,7 @@ export const Sheriff: React.FC<{
         bulletsRefs.current.push(newBullet);
         // console.log('BULLETSREF: ', bulletsRefs.current);
         
-        console.log('BULLETS ARRAY BEFORE NEW BULLET: ', bulletsArray);
+        // console.log('BULLETS ARRAY BEFORE NEW BULLET: ', bulletsArray);
         // THIS WILL NOT WORK, IT WILL MAKE ANOTHER BULLET WITH THE SAME KEY:
         // setBulletsArray([...bulletsArray, newBullet]);
         setBulletsArray([...bulletsRefs.current]);
@@ -196,7 +203,7 @@ export const Sheriff: React.FC<{
     // }, [deltaX]); 
 
     useEffect(() => {
-        console.log('USEEFFECT ON BULLETSARRAY CHANGE');        
+        // console.log('USEEFFECT ON BULLETSARRAY CHANGE');        
     }, [bulletsArray]); 
     
     
@@ -232,3 +239,5 @@ export const Sheriff: React.FC<{
         </>
     )
 }
+
+

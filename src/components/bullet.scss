@@ -1,7 +1,8 @@
 .bulletDiv {
     // border: 1px solid red;
     opacity: 0;
-    position: absolute;    
+    position: absolute;
+    align-self: center; //IMPORTANT AS TOP DIVS ARE STRETCH - IT NEEDS TO BE THE SAME AS SHERRIF'S
 }
 
 .bulletSvg {

@@ -1,0 +1,13 @@
+.targetArea {
+    height: var(--targetWidthFromJs);
+    // background-color: rgba(51, 160, 1, 0.8);
+    border: 1px solid red;
+    display: flex;
+    justify-content: space-around;
+}
+
+.target {
+    display: flex;
+    border: 1px solid white;
+    width: var(--targetWidthFromJs);
+}

@@ -1,8 +1,13 @@
 import React from 'react';
 import Measure from 'react-measure';
 import './App.scss';
+import { Panel } from './components/Panel';
+import './components/panel.scss';
+import { TargetArea } from './components/TargetArea';
+import './components/targetArea.scss';
 import { Sheriff } from './components/Sheriff';
 import './components/sheriff.scss';
+
 
 const App: React.FC = () => {
 
@@ -38,6 +43,8 @@ const App: React.FC = () => {
         {({ measureRef }) => (
            <div ref={measureRef} className="mainWrap">    
               <div className="board" style = {boardStyle}>
+                <Panel/>
+                <TargetArea/>
                 <Sheriff status = {0} wrapperWidth = {wrapperWidth}/>    
               </div>    
             </div>
