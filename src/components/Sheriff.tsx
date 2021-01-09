@@ -117,12 +117,24 @@ export const Sheriff: React.FC<{
             }
         }
     }
+
+    const calculateBulletRange = () => {    
+        const panel = document.querySelector("[data-name='panel']");
+        const targetArea = document.querySelector("[data-name='targetArea']");
+        if (panel && targetArea) {
+            const panelHeight = parseInt(window.getComputedStyle(panel).height);
+            const targetAreaHeight = parseInt(window.getComputedStyle(targetArea).height);
+            const bulletFlightRange = data.current.boardHeight - panelHeight - targetAreaHeight / 2
+            // console.log('BULLET RANGE: ', bulletFlightRange);
+            return bulletFlightRange;
+        } 
+    }
     
     const animateBullet = (el: HTMLDivElement) => {
         const tl = bulletTimeline();
         tl.set(el,  {transformOrigin: '50% 0%', x: data.current.deltaX});
-        tl.to(el, {opacity: 1, duration: 0}).delay(0.5);
-        tl.to(el, {bottom: '100%', duration: 2, onComplete: () => {
+        tl.to(el, {opacity: 1, duration: 0}).delay(0.3);
+        tl.to(el, {bottom: calculateBulletRange(), duration: 0.3, onComplete: () => {
             bulletsRefs.current.shift();
             setBulletsArray([...bulletsRefs.current]);
          }}).delay(0);
@@ -234,7 +246,7 @@ export const Sheriff: React.FC<{
         <>
         {console.log('SHERIFF RENDERED')}
         {bulletsArray}
-        <div ref={element => {rememberMyRef(element)}} className={sheriffClassNames.join(' ')} style = {sheriffStyle} onClick = {() => handleClick()}> <PlaneSvgComponent className="planeSvg" />           
+        <div ref={element => {rememberMyRef(element)}} className={sheriffClassNames.join(' ')} style = {sheriffStyle} onClick = {() => handleClick()}> <PlaneSvgComponent className="planeSvg"/>           
         </div>
         </>
     )

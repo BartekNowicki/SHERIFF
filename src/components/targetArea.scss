@@ -1,13 +1,62 @@
 .targetArea {
     height: var(--targetWidthFromJs);
     // background-color: rgba(51, 160, 1, 0.8);
-    border: 1px solid red;
+    // border: 1px solid red;
     display: flex;
     justify-content: space-around;
 }
 
 .target {
     display: flex;
-    border: 1px solid white;
+    // border: 1px solid white;
     width: var(--targetWidthFromJs);
+}
+
+.targetSvg {
+    width: 100%;
+    height: 100%;
+    // border: 1px solid green;
+    & g {
+        fill: green;
+    }    
+}
+
+.hit {
+    & g {
+        stroke-width: 500;
+        stroke: red;
+    }    
+}
+
+
+.blue {
+    & g {
+        fill: rgb(23, 23, 255);
+    } 
+}
+
+.red {
+    & g {
+        fill: red;
+    } 
+}
+.yellow {
+    & g {
+        fill:yellow;
+    } 
+}
+.brown {
+    & g {
+        fill:rgb(71, 15, 15);
+    } 
+}
+.white {
+    & g {
+        fill: rgb(240, 239, 239);
+    } 
+}
+.gray {
+    & g {
+        fill: gray;
+    } 
 }
