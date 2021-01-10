@@ -1,3 +1,6 @@
+import { useContext, useEffect } from 'react';
+import { AppStorage } from "../App";
+
 import { targets } from '../assets/targets/_targetList';
 import { ReactComponent as AppleSvgComponent } from "../assets/targets/apple.svg";
 import { ReactComponent as BananaSvgComponent } from "../assets/targets/banana.svg";
@@ -30,85 +33,105 @@ import { ReactComponent as StrawberrySvgComponent } from "../assets/targets/stra
 import { ReactComponent as TomatoSvgComponent } from "../assets/targets/tomato.svg";
 import { ReactComponent as WatermelonSvgComponent } from "../assets/targets/watermelon.svg";
 
-const itemClassName = "targetSvg";
-
-const itemComponents = [
-<AppleSvgComponent className={itemClassName}/>,
-<BananaSvgComponent className={itemClassName}/>,
-<BeanSvgComponent className={itemClassName}/>,
-<BeetSvgComponent className={itemClassName}/>,
-<BlueberrySvgComponent className={itemClassName}/>,
-<BroccoliSvgComponent className={itemClassName}/>,
-<CabbageSvgComponent className={itemClassName}/>,
-<CarrotSvgComponent className={itemClassName}/>,
-<CherrySvgComponent className={itemClassName}/>,
-<CoconutSvgComponent className={itemClassName}/>,
-<CornSvgComponent className={itemClassName}/>,
-<CucumberSvgComponent className={itemClassName}/>,
-<EggplantSvgComponent className={itemClassName}/>,
-<GarlicSvgComponent className={itemClassName}/>,
-<GrapesSvgComponent className={itemClassName}/>,
-<LemonSvgComponent className={itemClassName}/>,
-<MangoSvgComponent className={itemClassName}/>,
-<MelonSvgComponent className={itemClassName}/>,
-<OnionSvgComponent className={itemClassName}/>,
-<OrangeSvgComponent className={itemClassName}/>,
-<PearSvgComponent className={itemClassName}/>,
-<PeasSvgComponent className={itemClassName}/>,
-<PepperSvgComponent className={itemClassName}/>,
-<PineappleSvgComponent className={itemClassName}/>,
-<PumpkinSvgComponent className={itemClassName}/>,
-<RadishSvgComponent className={itemClassName}/>,
-<RaspberrySvgComponent className={itemClassName}/>,
-<StrawberrySvgComponent className={itemClassName}/>,
-<TomatoSvgComponent className={itemClassName}/>,
-<WatermelonSvgComponent className={itemClassName}/>,
-];
-
-
-const targetClassNames = () => {
-    const colorOptions = ["green", "blue", "red", "yellow", "brown", "white", "gray"];
-    const baseClass = ["target"];
-    return `${baseClass[0]} ${colorOptions[Math.floor(Math.random() * colorOptions.length)]}`;
-}
-
-const pickThreeItemComponents = () => {
-
-    let randomNumbers = [];
-    let pickedItemComponents = [];
-    
-        
-    const i = Math.floor(Math.random() * itemComponents.length);
-    const j = Math.floor(Math.random() * itemComponents.length);
-    const k = Math.floor(Math.random() * itemComponents.length);
-    if (i !== j && j !==k) {
-        randomNumbers = [i, j, k];
-    } else randomNumbers = [1, 2, 3];
-
-    
-
-    for (let x = 0; x<3; x++) {
-        let randomNumber = randomNumbers[x];
-
-        pickedItemComponents.push(
-            <div ref={element => {showIt(element)}}
-            key = {targets[randomNumber].id}
-            className = {targetClassNames()}
-            data-name = {targets[randomNumber].name}>
-            {itemComponents[randomNumber]}
-            </div>
-        );
-    }
-
-    return pickedItemComponents;
-}
-
-const showIt = (el:any) => el ? console.log(el.dataset.name) : {};
 
 export const TargetArea = () => {
+    const { targetDescription, setTargetDescription } = useContext(AppStorage); 
+    const itemClassName = "targetSvg";
+
+    const itemComponents = [
+    <AppleSvgComponent className={itemClassName}/>,
+    <BananaSvgComponent className={itemClassName}/>,
+    <BeanSvgComponent className={itemClassName}/>,
+    <BeetSvgComponent className={itemClassName}/>,
+    <BlueberrySvgComponent className={itemClassName}/>,
+    <BroccoliSvgComponent className={itemClassName}/>,
+    <CabbageSvgComponent className={itemClassName}/>,
+    <CarrotSvgComponent className={itemClassName}/>,
+    <CherrySvgComponent className={itemClassName}/>,
+    <CoconutSvgComponent className={itemClassName}/>,
+    <CornSvgComponent className={itemClassName}/>,
+    <CucumberSvgComponent className={itemClassName}/>,
+    <EggplantSvgComponent className={itemClassName}/>,
+    <GarlicSvgComponent className={itemClassName}/>,
+    <GrapesSvgComponent className={itemClassName}/>,
+    <LemonSvgComponent className={itemClassName}/>,
+    <MangoSvgComponent className={itemClassName}/>,
+    <MelonSvgComponent className={itemClassName}/>,
+    <OnionSvgComponent className={itemClassName}/>,
+    <OrangeSvgComponent className={itemClassName}/>,
+    <PearSvgComponent className={itemClassName}/>,
+    <PeasSvgComponent className={itemClassName}/>,
+    <PepperSvgComponent className={itemClassName}/>,
+    <PineappleSvgComponent className={itemClassName}/>,
+    <PumpkinSvgComponent className={itemClassName}/>,
+    <RadishSvgComponent className={itemClassName}/>,
+    <RaspberrySvgComponent className={itemClassName}/>,
+    <StrawberrySvgComponent className={itemClassName}/>,
+    <TomatoSvgComponent className={itemClassName}/>,
+    <WatermelonSvgComponent className={itemClassName}/>,
+    ];
+
+    const targetClassNames = () => {
+        const colorOptions = ["green", "blue", "red", "yellow", "brown", "white", "gray"];
+        const baseClass = ["target"];
+        return `${baseClass[0]} ${colorOptions[Math.floor(Math.random() * colorOptions.length)]}`;
+    }
+    
+    const pickTargetDescription = (candidates: JSX.Element[]) => {
+        const randomNumber = Math.floor(Math.random() * candidates.length);
+        const propsObj = candidates[randomNumber].props;
+        // console.log(propsObj);   
+        //STRUCTURE OF PROPSOBJ: className: "target blue", data-name: "watermelon"
+        const color = String(Object.values(propsObj)[0]).slice(7);
+        const type = Object.values(propsObj)[1];
+        // console.log(color, type);
+        if (Math.random() >= 0.5) return type
+        return color
+    }
+    
+    const pickThreeItemComponents = () => { 
+        let randomNumbers = [];
+        let pickedItemComponents: JSX.Element[] = [];
+        const i = Math.floor(Math.random() * itemComponents.length);
+        const j = Math.floor(Math.random() * itemComponents.length);
+        const k = Math.floor(Math.random() * itemComponents.length);
+        if (i !== j && j !==k) {
+            randomNumbers = [i, j, k];
+        } else randomNumbers = [1, 2, 3];    
+    
+        for (let x = 0; x<3; x++) {
+            let randomNumber = randomNumbers[x];
+            pickedItemComponents.push(
+                <div ref={element => {showIt(element)}}
+                key = {targets[randomNumber].id}
+                className = {targetClassNames()}
+                data-name = {targets[randomNumber].name}>
+                {itemComponents[randomNumber]}
+                </div>
+            );
+        }
+        return pickedItemComponents;
+    }
+    
+    const showIt = (el:any) => {
+        if(!el) return
+        // console.log(el.dataset.name);
+    };
+
+    let pickedItems: JSX.Element[] = [];
+    let pickedTargetFeatureForDisplay: any = '';
+
+    useEffect(() => {        
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        pickedTargetFeatureForDisplay = pickTargetDescription(pickedItems);
+        setTargetDescription(pickedTargetFeatureForDisplay);        
+    }, []);
+
+    pickedItems = pickThreeItemComponents(); 
+
     return (
-        <section className = "targetArea" data-name = 'targetArea'>
-            {pickThreeItemComponents()}
-        </section>
+    <section className = "targetArea" data-name = 'targetArea'>
+        {pickedItems}
+    </section>
     )
 }

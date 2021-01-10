@@ -2,7 +2,6 @@ import gsap from 'gsap';
 import React, { useState, useEffect, useRef } from 'react';
 import { ReactComponent as PlaneSvgComponent } from "../assets/plane.svg";
 import { Bullet } from './Bullet';
-
 import './bullet.scss';
 
 export const Sheriff: React.FC<{
@@ -11,7 +10,17 @@ export const Sheriff: React.FC<{
 
     const [sheriffClickCount, setSheriffClickCount] = useState<number>(status);
 
-    const data = useRef({boardWidth: 0, boardHeight: 0, sheriffWidth: 0, deltaIncrement: 0, deltaX: 0, maxDeltaX: 0, bulletCount: 0, inMotionLeft: false, inMotionRight: false});
+    const data = useRef({
+        boardWidth: 0, 
+        boardHeight: 0, 
+        sheriffWidth: 0, 
+        deltaIncrement: 0, 
+        deltaX: 0, 
+        maxDeltaX: 0, 
+        bulletCount: 0, 
+        inMotionLeft: false, 
+        inMotionRight: false,
+        isCorrectShot: false});
     
     // UNUSED const [deltaX, setDeltaX] = useState<number>(0);
 
@@ -56,7 +65,7 @@ export const Sheriff: React.FC<{
             data.current.boardWidth = boardWidth;
             const boardHeight = Math.round(getDimentions('.board').height);
             data.current.boardHeight = boardHeight;
-            const sheriffWidth = Math.round(boardWidth / 8);
+            const sheriffWidth = Math.round(boardWidth / 4);
             data.current.sheriffWidth = sheriffWidth;
             // const deltaIncrement = sheriffWidth;
             const deltaIncrement = 20;
@@ -124,7 +133,7 @@ export const Sheriff: React.FC<{
         if (panel && targetArea) {
             const panelHeight = parseInt(window.getComputedStyle(panel).height);
             const targetAreaHeight = parseInt(window.getComputedStyle(targetArea).height);
-            const bulletFlightRange = data.current.boardHeight - panelHeight - targetAreaHeight / 2
+            const bulletFlightRange = data.current.boardHeight - panelHeight - targetAreaHeight;
             // console.log('BULLET RANGE: ', bulletFlightRange);
             return bulletFlightRange;
         } 
@@ -214,9 +223,9 @@ export const Sheriff: React.FC<{
     //     // console.log('USEEFFECT ON DELTAX CHANGE');        
     // }, [deltaX]); 
 
-    useEffect(() => {
-        // console.log('USEEFFECT ON BULLETSARRAY CHANGE');        
-    }, [bulletsArray]); 
+    // useEffect(() => {
+    //     // console.log('USEEFFECT ON BULLETSARRAY CHANGE');        
+    // }, [bulletsArray]); 
     
     
 
