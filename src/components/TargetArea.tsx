@@ -35,7 +35,7 @@ import { ReactComponent as WatermelonSvgComponent } from "../assets/targets/wate
 
 
 export const TargetArea = () => {
-    const { targetDescription, setTargetDescription } = useContext(AppStorage); 
+    const { targetDescription, setTargetDescription } = useContext(AppStorage);
     const itemClassName = "targetSvg";
 
     const itemComponents = [
@@ -95,17 +95,18 @@ export const TargetArea = () => {
         const i = Math.floor(Math.random() * itemComponents.length);
         const j = Math.floor(Math.random() * itemComponents.length);
         const k = Math.floor(Math.random() * itemComponents.length);
-        if (i !== j && j !==k) {
+        if (i !== j && j !==k && i !== k) {
             randomNumbers = [i, j, k];
         } else randomNumbers = [1, 2, 3];    
-    
-        for (let x = 0; x<3; x++) {
+        const positions = ['left', 'center', 'right'];
+        for (let x = 0; x<3; x++) {            
             let randomNumber = randomNumbers[x];
             pickedItemComponents.push(
                 <div ref={element => {showIt(element)}}
                 key = {targets[randomNumber].id}
                 className = {targetClassNames()}
-                data-name = {targets[randomNumber].name}>
+                data-name = {targets[randomNumber].name}
+                data-position = {positions[x]}>
                 {itemComponents[randomNumber]}
                 </div>
             );

@@ -1,5 +1,6 @@
 import gsap from 'gsap';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { AppStorage } from "../App";
 import { ReactComponent as PlaneSvgComponent } from "../assets/plane.svg";
 import { Bullet } from './Bullet';
 import './bullet.scss';
@@ -9,6 +10,9 @@ export const Sheriff: React.FC<{
     wrapperWidth: number}> = ({status, wrapperWidth})  => {
 
     const [sheriffClickCount, setSheriffClickCount] = useState<number>(status);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { targetDescription, setTargetDescription } = useContext(AppStorage);
+    // console.log('TARGET DESCRIPTION1: ', targetDescription);
 
     const data = useRef({
         boardWidth: 0, 
@@ -20,10 +24,9 @@ export const Sheriff: React.FC<{
         bulletCount: 0, 
         inMotionLeft: false, 
         inMotionRight: false,
-        isCorrectShot: false});
+        isCorrectShot: false,
+        targetDescriptionFromStore: ''});
     
-    // UNUSED const [deltaX, setDeltaX] = useState<number>(0);
-
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [canMove, setcanMove] = useState<string>('canMoveOn');
     //canMoveOf will disable moving - not used yet, only set up in key press handler
@@ -50,12 +53,14 @@ export const Sheriff: React.FC<{
 
     const bulletTimeline = (): gsap.core.Timeline => gsap.timeline({ paused: false, ease: "none" });
     const sherrifTimeline = (): gsap.core.Timeline => gsap.timeline({ paused: true, ease: "none" });
+    const hitTargetTimeline = (): gsap.core.Timeline => gsap.timeline({ paused: true, ease: "none" });
+
     const tlLeft = sherrifTimeline();
     const tlRight = sherrifTimeline();
 
     const setCssVariables = (value: number) => {
         document.documentElement.style.setProperty('--targetWidthFromJs', `${value / 4}px`);
-        console.log('targetWidthFromJs: ', getComputedStyle(document.documentElement).getPropertyValue('--targetWidthFromJs'));
+        // console.log('targetWidthFromJs: ', getComputedStyle(document.documentElement).getPropertyValue('--targetWidthFromJs'));
     }
 
     const performMeasurements = () => {
@@ -138,12 +143,65 @@ export const Sheriff: React.FC<{
             return bulletFlightRange;
         } 
     }
+
+    const animateGoodShot = (targetHit: HTMLDivElement) => {
+        const tl = hitTargetTimeline();
+        tl.to(targetHit, {scale: 0, duration: 0.5}).delay(0.5);
+        tl.play();
+
+    }
+
+    const animateBadShot = (targetHit: HTMLDivElement, cycles = 21, counter = 0) => {
+        //IF MODULO IS 4 THEN CYCLES MUST BE AN ODD NUMBER FOR THE TOGGLE TO LEAVE OFF AT REMOVE
+        if (!!cycles) {
+            window.requestAnimationFrame(() => animateBadShot(targetHit, --cycles, ++counter));
+        }
+        if (counter % 4 === 0) {
+            targetHit.classList.toggle('hit');
+            // console.log('tick');
+        } 
+        // console.log(cycles, counter);
+    
+        
+    }
+
+    const checkBulletHitAndAnimate = (side: string) => {
+        let targetHit: any;
+        if (document.querySelector(`[data-position='${side}']`)) {
+            targetHit = document.querySelector(`[data-position='${side}']`);            
+            // console.log('TARGET CLASSLIST: ', targetHit.classList.toString());
+            // console.log('TARGET DATASET: ', targetHit.dataset);
+            // console.log('TARGET DATASET-NAME: ', targetHit.dataset.name.toString());
+            const hitItemCharacteristics: string = targetHit.classList.toString() + ' ' + targetHit.dataset.name.toString();
+            if (hitItemCharacteristics.includes(data.current.targetDescriptionFromStore)) {
+                console.log('GOOD SHOT!');
+                animateGoodShot(targetHit);
+            } else {
+                console.log('WRONG TARGET!');
+                animateBadShot(targetHit);
+            }          
+        }       
+    }    
     
     const animateBullet = (el: HTMLDivElement) => {
+        const sixth = data.current.maxDeltaX / 3;
+        let side: string;
+        let leftSidePoint = -(data.current.maxDeltaX - sixth * 2);
+        let rightSidePoint = (data.current.maxDeltaX - sixth * 2);
+        // console.log(leftSidePoint, rightSidePoint, data.current.maxDeltaX);
+        if (data.current.deltaX < leftSidePoint) {
+            side = 'left';
+        } else if (data.current.deltaX > rightSidePoint) {
+            side = 'right';
+        } else {
+            side = 'center';
+        }
+            
         const tl = bulletTimeline();
         tl.set(el,  {transformOrigin: '50% 0%', x: data.current.deltaX});
         tl.to(el, {opacity: 1, duration: 0}).delay(0.3);
         tl.to(el, {bottom: calculateBulletRange(), duration: 0.3, onComplete: () => {
+            checkBulletHitAndAnimate(side);
             bulletsRefs.current.shift();
             setBulletsArray([...bulletsRefs.current]);
          }}).delay(0);
@@ -161,15 +219,9 @@ export const Sheriff: React.FC<{
     const shoot = () => {        
         data.current.bulletCount = data.current.bulletCount + 1;        
         const newBullet = <Bullet key = {data.current.bulletCount} nr = {data.current.bulletCount} sheriffWidth = {data.current.sheriffWidth} domNodeGetter = {getDomNodeFromChild}/>
-                
         bulletsRefs.current.push(newBullet);
         // console.log('BULLETSREF: ', bulletsRefs.current);
-        
-        // console.log('BULLETS ARRAY BEFORE NEW BULLET: ', bulletsArray);
-        // THIS WILL NOT WORK, IT WILL MAKE ANOTHER BULLET WITH THE SAME KEY:
-        // setBulletsArray([...bulletsArray, newBullet]);
         setBulletsArray([...bulletsRefs.current]);
-
         // console.log('BULLETS ARRAY AFTER NEW BULLET: ', bulletsArray);
         // console.log('BULLET COUNT: ', data.current.bulletCount);
     }
@@ -251,6 +303,11 @@ export const Sheriff: React.FC<{
         } 
     }
     
+    useEffect(() => {        
+        console.log('SHERIFF SEES TARGET DESCRIPTION CHANGE!!!');
+        data.current.targetDescriptionFromStore = targetDescription;
+    }, [targetDescription]);
+
     return (
         <>
         {console.log('SHERIFF RENDERED')}
