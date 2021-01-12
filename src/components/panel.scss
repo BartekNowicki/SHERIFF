@@ -4,9 +4,19 @@
     background-color: rgba(51, 160, 1, 0.8);
     border: 10px solid transparent;
     color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 2vh;
-    & p {
-        font-size: 5vmin;
+    margin-bottom: 4vh;
+    & span {
+        font-size: 10vmin;
         padding: 2vmin;
+    }
+    & span:nth-of-type(2) {
+        font-size: 8vmin;
+        position: absolute;
+        top: 2vh;
+        border-radius: 50%;
+        background-color: rgb(5, 238, 160);
+        right: 8vmin;
+        color: rgb(150, 36, 1);
+        box-shadow: 5px 3px 5px rgba(0, 0, 0, 0.3);
     }
 }

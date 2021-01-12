@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { AppStorage } from "../App";
 
 import { targets } from '../assets/targets/_targetList';
@@ -37,6 +37,14 @@ import { ReactComponent as WatermelonSvgComponent } from "../assets/targets/wate
 export const TargetArea = () => {
     const { targetDescription, setTargetDescription } = useContext(AppStorage);
     const itemClassName = "targetSvg";
+
+    let initialArray: JSX.Element[] = [];
+    
+    const [pickedItems, setPickedItems] = useState(initialArray);
+    
+    // <Array<JSX.Element>>([]);
+
+    
 
     const itemComponents = [
     <AppleSvgComponent className={itemClassName}/>,
@@ -119,17 +127,28 @@ export const TargetArea = () => {
         // console.log(el.dataset.name);
     };
 
-    let pickedItems: JSX.Element[] = [];
+    
     let pickedTargetFeatureForDisplay: any = '';
 
-    useEffect(() => {        
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        pickedTargetFeatureForDisplay = pickTargetDescription(pickedItems);
-        setTargetDescription(pickedTargetFeatureForDisplay);        
-    }, []);
+    const getNewTargets = () => {
+        const newTargets = pickThreeItemComponents();
+        setPickedItems(newTargets);
+        pickedTargetFeatureForDisplay = pickTargetDescription(newTargets);
+        setTargetDescription(pickedTargetFeatureForDisplay);
+    }
+        
+    useEffect(() => {
+        getNewTargets();
+        const targetsChangeInterval = setInterval(() => {
+            console.log('CLICK INTERVAL');
+            getNewTargets();
+        }, 4000);  
 
-    pickedItems = pickThreeItemComponents(); 
-
+        return () => {
+             clearInterval(targetsChangeInterval);
+          };        
+    }, []);    
+ 
     return (
     <section className = "targetArea" data-name = 'targetArea'>
         {pickedItems}

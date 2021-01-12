@@ -11,21 +11,22 @@ export const Sheriff: React.FC<{
 
     const [sheriffClickCount, setSheriffClickCount] = useState<number>(status);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { targetDescription, setTargetDescription } = useContext(AppStorage);
+    const { targetDescription, score, setScore } = useContext(AppStorage);
     // console.log('TARGET DESCRIPTION1: ', targetDescription);
 
     const data = useRef({
         boardWidth: 0, 
         boardHeight: 0, 
         sheriffWidth: 0, 
-        deltaIncrement: 0, 
+        deltaIncrement: 0,
         deltaX: 0, 
         maxDeltaX: 0, 
         bulletCount: 0, 
         inMotionLeft: false, 
         inMotionRight: false,
         isCorrectShot: false,
-        targetDescriptionFromStore: ''});
+        targetDescriptionFromStore: '',
+        score: 0});
     
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [canMove, setcanMove] = useState<string>('canMoveOn');
@@ -72,8 +73,7 @@ export const Sheriff: React.FC<{
             data.current.boardHeight = boardHeight;
             const sheriffWidth = Math.round(boardWidth / 4);
             data.current.sheriffWidth = sheriffWidth;
-            // const deltaIncrement = sheriffWidth;
-            const deltaIncrement = 20;
+            const deltaIncrement = sheriffWidth / 2;
             data.current.deltaIncrement = deltaIncrement;
             const maxDeltaX = Math.round(boardWidth / 2 - sheriffWidth / 2);
             data.current.maxDeltaX = maxDeltaX;
@@ -148,7 +148,6 @@ export const Sheriff: React.FC<{
         const tl = hitTargetTimeline();
         tl.to(targetHit, {scale: 0, duration: 0.5}).delay(0.5);
         tl.play();
-
     }
 
     const animateBadShot = (targetHit: HTMLDivElement, cycles = 21, counter = 0) => {
@@ -159,10 +158,8 @@ export const Sheriff: React.FC<{
         if (counter % 4 === 0) {
             targetHit.classList.toggle('hit');
             // console.log('tick');
-        } 
+        }
         // console.log(cycles, counter);
-    
-        
     }
 
     const checkBulletHitAndAnimate = (side: string) => {
@@ -174,11 +171,13 @@ export const Sheriff: React.FC<{
             // console.log('TARGET DATASET-NAME: ', targetHit.dataset.name.toString());
             const hitItemCharacteristics: string = targetHit.classList.toString() + ' ' + targetHit.dataset.name.toString();
             if (hitItemCharacteristics.includes(data.current.targetDescriptionFromStore)) {
-                console.log('GOOD SHOT!');
                 animateGoodShot(targetHit);
+                data.current.score = data.current.score + 1;
+                setScore(data.current.score);
             } else {
-                console.log('WRONG TARGET!');
                 animateBadShot(targetHit);
+                data.current.score = Math.max(0, data.current.score - 2);
+                setScore(data.current.score);
             }          
         }       
     }    
@@ -255,13 +254,7 @@ export const Sheriff: React.FC<{
 
     useEffect(() => {        
         window.addEventListener('keyup', (e) => handleKeyPress(e));  
-        // console.log('CONTROLSLISTENER ASSIGNED');
-        //cleanup to remove listener before re-rendering not necessary if empty dependency []
-        //cleanup would look like so:
-        //return window.removeEventListener('keyup', handleKeyPress);
         performMeasurements();
-        
-               
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);    
 
@@ -304,7 +297,7 @@ export const Sheriff: React.FC<{
     }
     
     useEffect(() => {        
-        console.log('SHERIFF SEES TARGET DESCRIPTION CHANGE!!!');
+        // console.log('SHERIFF SEES TARGET DESCRIPTION CHANGE!!!');
         data.current.targetDescriptionFromStore = targetDescription;
     }, [targetDescription]);
 

@@ -4,13 +4,13 @@ import { AppStorage } from "../App";
 
 
 export const Panel = () => {
-    const { targetDescription } = useContext(AppStorage);
+    const { targetDescription, score } = useContext(AppStorage);
         
     return (
         <>
         {console.log(`PANEL RENDERED`)}        
             <div className = "panel" data-name = 'panel'>
-                <p>{targetDescription}</p>
+                <span>{targetDescription}</span><span>{score}</span>
             </div>        
         </>
     )

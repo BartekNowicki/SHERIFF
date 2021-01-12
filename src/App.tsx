@@ -10,7 +10,9 @@ import './components/sheriff.scss';
 
 interface GameData {
   targetDescription: string;
-  setTargetDescription: Function; 
+  setTargetDescription: Function;
+  score: number;
+  setScore: Function;
 }
 
 export const AppStorage: React.Context<GameData> = React.createContext<any>('');
@@ -18,6 +20,7 @@ export const AppStorage: React.Context<GameData> = React.createContext<any>('');
 const App: React.FC = () => {
 
   const [targetDescription, setTargetDescription] = useState<string>('');
+  const [score, setScore] = useState<number>(0);
 
   let wrapperWidth = 0;
   const boardStyle = {
@@ -51,7 +54,7 @@ const App: React.FC = () => {
         {({ measureRef }) => (
            <div ref={measureRef} className="mainWrap">    
               <div className="board" style = {boardStyle}>
-                <AppStorage.Provider value = {{targetDescription, setTargetDescription}}>
+                <AppStorage.Provider value = {{targetDescription, setTargetDescription, score, setScore}}>
                   <Panel/>
                   <TargetArea/>
                   <Sheriff status = {0} wrapperWidth = {wrapperWidth}/>    
