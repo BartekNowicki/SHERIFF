@@ -11,7 +11,7 @@ export const Sheriff: React.FC<{
 
     const [sheriffClickCount, setSheriffClickCount] = useState<number>(status);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { targetDescription, score, setScore } = useContext(AppStorage);
+    const { targetDescription, score, setScore, isSound } = useContext(AppStorage);
     // console.log('TARGET DESCRIPTION1: ', targetDescription);
 
     const data = useRef({
@@ -26,7 +26,11 @@ export const Sheriff: React.FC<{
         inMotionRight: false,
         isCorrectShot: false,
         targetDescriptionFromStore: '',
-        score: 0});
+        score: 0,
+        goodShotSoundPath: null,
+        badShotSoundPath: null,
+        isSoundFromStore: false,
+        targetsDown : [0,0,0]}); //OTHERWISE TYPESCRIPT COMPLAINS
     
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [canMove, setcanMove] = useState<string>('canMoveOn');
@@ -146,7 +150,7 @@ export const Sheriff: React.FC<{
 
     const animateGoodShot = (targetHit: HTMLDivElement) => {
         const tl = hitTargetTimeline();
-        tl.to(targetHit, {scale: 0, duration: 0.5}).delay(0.5);
+        tl.to(targetHit, {scale: 0, duration: 0.5, onComplete: () => { }}).delay(0.5);
         tl.play();
     }
 
@@ -162,7 +166,39 @@ export const Sheriff: React.FC<{
         // console.log(cycles, counter);
     }
 
+    const playGoodSound = (path: any ) => {
+        if (path) {
+            if (path.default) {
+                const audio = new Audio(path.default);
+                audio.play();
+            }
+        }        
+    };
+
+    const playBadSound = (path: any ) => {
+        if (path) {
+            if (path.default) {
+                const audio = new Audio(path.default);
+                audio.play();
+            }
+        }        
+    };
+
+    const updateShotTargetsArray = (side: string) => {
+        if (side === 'left') {
+            data.current.targetsDown[0] = 1;
+        } else if (side === 'right') {
+            data.current.targetsDown[2] = 1;
+        } else {
+            data.current.targetsDown[1] = 1;
+        }
+    }
+
     const checkBulletHitAndAnimate = (side: string) => {
+        if(side === 'left' && data.current.targetsDown[0]) return
+        if(side === 'center' && data.current.targetsDown[1]) return
+        if(side === 'right' && data.current.targetsDown[2]) return
+
         let targetHit: any;
         if (document.querySelector(`[data-position='${side}']`)) {
             targetHit = document.querySelector(`[data-position='${side}']`);            
@@ -171,15 +207,18 @@ export const Sheriff: React.FC<{
             // console.log('TARGET DATASET-NAME: ', targetHit.dataset.name.toString());
             const hitItemCharacteristics: string = targetHit.classList.toString() + ' ' + targetHit.dataset.name.toString();
             if (hitItemCharacteristics.includes(data.current.targetDescriptionFromStore)) {
+                data.current.isSoundFromStore && playGoodSound(data.current.goodShotSoundPath);
                 animateGoodShot(targetHit);
                 data.current.score = data.current.score + 1;
                 setScore(data.current.score);
+                updateShotTargetsArray(side);
             } else {
+                data.current.isSoundFromStore && playBadSound(data.current.badShotSoundPath);
                 animateBadShot(targetHit);
                 data.current.score = Math.max(0, data.current.score - 2);
                 setScore(data.current.score);
             }          
-        }       
+        }        
     }    
     
     const animateBullet = (el: HTMLDivElement) => {
@@ -225,8 +264,7 @@ export const Sheriff: React.FC<{
         // console.log('BULLET COUNT: ', data.current.bulletCount);
     }
     
-    const handleKeyPress = (e: KeyboardEvent) => {
-        
+    const handleKeyPress = (e: KeyboardEvent) => {        
         // console.log('CLASSNAME INSIDE HANDLER: ', getClassNames('.sheriffDiv'));
         if (getClassNames('.sheriffDiv').includes('canMoveOff')) return
 
@@ -252,9 +290,15 @@ export const Sheriff: React.FC<{
               }      
     };
 
+    const addSounds = () => {
+        data.current.goodShotSoundPath = require('../assets/goodShot.mp3');
+        data.current.badShotSoundPath = require('../assets/badShot.mp3');
+    }
+
     useEffect(() => {        
         window.addEventListener('keyup', (e) => handleKeyPress(e));  
         performMeasurements();
+        addSounds();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);    
 
@@ -299,13 +343,24 @@ export const Sheriff: React.FC<{
     useEffect(() => {        
         // console.log('SHERIFF SEES TARGET DESCRIPTION CHANGE!!!');
         data.current.targetDescriptionFromStore = targetDescription;
+        data.current.targetsDown = [0, 0, 0];
     }, [targetDescription]);
+
+    useEffect(() => {        
+        // console.log('SHERIFF SEES SOUND TOGGLE!!!');
+        data.current.isSoundFromStore = isSound;
+    }, [isSound]);
+
 
     return (
         <>
         {console.log('SHERIFF RENDERED')}
         {bulletsArray}
-        <div ref={element => {rememberMyRef(element)}} className={sheriffClassNames.join(' ')} style = {sheriffStyle} onClick = {() => handleClick()}> <PlaneSvgComponent className="planeSvg"/>           
+        <div ref={element => {rememberMyRef(element)}} 
+            className={sheriffClassNames.join(' ')} 
+            style = {sheriffStyle} 
+            onClick = {() => handleClick()}> 
+        <PlaneSvgComponent className="planeSvg"/>
         </div>
         </>
     )

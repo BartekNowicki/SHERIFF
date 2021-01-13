@@ -13,6 +13,8 @@ interface GameData {
   setTargetDescription: Function;
   score: number;
   setScore: Function;
+  isSound: boolean;
+  setIsSound: Function;
 }
 
 export const AppStorage: React.Context<GameData> = React.createContext<any>('');
@@ -21,11 +23,13 @@ const App: React.FC = () => {
 
   const [targetDescription, setTargetDescription] = useState<string>('');
   const [score, setScore] = useState<number>(0);
+  const [isSound, setIsSound] = useState<boolean>(false);
+  
 
   let wrapperWidth = 0;
   const boardStyle = {
     width: '98%',
-    maxWidth: '800px',
+    maxWidth: '600px',
     height: '98%',    
   };  
   
@@ -54,7 +58,7 @@ const App: React.FC = () => {
         {({ measureRef }) => (
            <div ref={measureRef} className="mainWrap">    
               <div className="board" style = {boardStyle}>
-                <AppStorage.Provider value = {{targetDescription, setTargetDescription, score, setScore}}>
+                <AppStorage.Provider value = {{isSound, setIsSound, targetDescription, setTargetDescription, score, setScore}}>
                   <Panel/>
                   <TargetArea/>
                   <Sheriff status = {0} wrapperWidth = {wrapperWidth}/>    

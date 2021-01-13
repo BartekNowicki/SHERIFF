@@ -35,17 +35,11 @@ import { ReactComponent as WatermelonSvgComponent } from "../assets/targets/wate
 
 
 export const TargetArea = () => {
-    const { targetDescription, setTargetDescription } = useContext(AppStorage);
+    const { setTargetDescription } = useContext(AppStorage);
     const itemClassName = "targetSvg";
-
     let initialArray: JSX.Element[] = [];
-    
     const [pickedItems, setPickedItems] = useState(initialArray);
     
-    // <Array<JSX.Element>>([]);
-
-    
-
     const itemComponents = [
     <AppleSvgComponent className={itemClassName}/>,
     <BananaSvgComponent className={itemClassName}/>,
