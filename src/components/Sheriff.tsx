@@ -30,7 +30,11 @@ export const Sheriff: React.FC<{
         goodShotSoundPath: null,
         badShotSoundPath: null,
         isSoundFromStore: false,
-        targetsDown : [0,0,0]}); //OTHERWISE TYPESCRIPT COMPLAINS
+        targetsDown : [0,0,0],
+        touchInitialX: -1,
+        touchFinalX: -1,
+        swipeThrottled: false,
+        });
     
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [canMove, setcanMove] = useState<string>('canMoveOn');
@@ -293,34 +297,53 @@ export const Sheriff: React.FC<{
     const addSounds = () => {
         data.current.goodShotSoundPath = require('../assets/goodShot.mp3');
         data.current.badShotSoundPath = require('../assets/badShot.mp3');
+        console.log('SOUND ADDED');
+    }
+
+    const startTouch = (e: TouchEvent) => {
+        // e.preventDefault(); -- TO MUCH LOAD ON PERFORMANCE, USED THROTTLING INSTEAD
+        data.current.touchInitialX = e.touches[0].clientX;
+    }
+
+    const moveTouch = (e: TouchEvent) => {
+        if (data.current.swipeThrottled) return
+        if (data.current.touchInitialX === -1) return
+        data.current.touchFinalX = e.touches[0].clientX;
+        
+        if (data.current.touchFinalX - data.current.touchInitialX > 0) {
+            data.current.swipeThrottled = true;
+            if (tlRight.isActive() === false) {
+                move('right', data.current.deltaIncrement);
+            }
+            setTimeout(()=> data.current.swipeThrottled = false, 500);
+        } else if (data.current.touchFinalX - data.current.touchInitialX < -0) {
+            data.current.swipeThrottled = true;
+            if (tlLeft.isActive() === false) {
+                move('left', data.current.deltaIncrement);
+            }
+            data.current.swipeThrottled = true;
+            setTimeout(()=> data.current.swipeThrottled = false, 500);
+        }
+    };
+
+    const addEventListeners = () => {
+        document.addEventListener('touchstart', (e) => startTouch(e));
+        document.addEventListener('touchmove', (e) => moveTouch(e));
+        window.addEventListener('keyup', (e) => handleKeyPress(e));
     }
 
     useEffect(() => {        
-        window.addEventListener('keyup', (e) => handleKeyPress(e));  
+        addEventListeners();        
         performMeasurements();
         addSounds();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);    
 
-    useEffect(() => {        
-    // console.log(`USEEFFECT ON KEY PRESS: ${canMove} dX: ${deltaX}`);        
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    // }, [handleKeyPress]);   
-}, []);
-
-    // useEffect(() => {
-    //     // console.log('USEEFFECT ON DELTAX CHANGE');        
-    // }, [deltaX]); 
-
-    // useEffect(() => {
-    //     // console.log('USEEFFECT ON BULLETSARRAY CHANGE');        
-    // }, [bulletsArray]); 
-    
-    
-
     const handleClick = () => {
         setSheriffClickCount(sheriffClickCount => sheriffClickCount + 1);
-        console.log(`SHERIFF CLICKED, INCREASING CLICK COUNT TO: ${sheriffClickCount}`);
+        shoot();
+        // console.log(`SHERIFF CLICKED, INCREASING CLICK COUNT TO: ${sheriffClickCount}`);
+
     }   
 
     const sheriffStyle = {
