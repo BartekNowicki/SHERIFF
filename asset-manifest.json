@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/sheriff/static/css/main.6b87eba9.chunk.css",
+    "main.css": "/sheriff/static/css/main.9beb59b1.chunk.css",
     "main.js": "/sheriff/static/js/main.a15f22c1.chunk.js",
     "main.js.map": "/sheriff/static/js/main.a15f22c1.chunk.js.map",
     "runtime-main.js": "/sheriff/static/js/runtime-main.baaff99a.js",
@@ -10,7 +10,7 @@
     "static/js/3.71999f47.chunk.js": "/sheriff/static/js/3.71999f47.chunk.js",
     "static/js/3.71999f47.chunk.js.map": "/sheriff/static/js/3.71999f47.chunk.js.map",
     "index.html": "/sheriff/index.html",
-    "static/css/main.6b87eba9.chunk.css.map": "/sheriff/static/css/main.6b87eba9.chunk.css.map",
+    "static/css/main.9beb59b1.chunk.css.map": "/sheriff/static/css/main.9beb59b1.chunk.css.map",
     "static/js/2.b404a69e.chunk.js.LICENSE.txt": "/sheriff/static/js/2.b404a69e.chunk.js.LICENSE.txt",
     "static/media/apple.dc5f66f1.svg": "/sheriff/static/media/apple.dc5f66f1.svg",
     "static/media/badShot.mp3": "/sheriff/static/media/badShot.1d564e72.mp3",
@@ -52,7 +52,7 @@
   "entrypoints": [
     "static/js/runtime-main.baaff99a.js",
     "static/js/2.b404a69e.chunk.js",
-    "static/css/main.6b87eba9.chunk.css",
+    "static/css/main.9beb59b1.chunk.css",
     "static/js/main.a15f22c1.chunk.js"
   ]
 }
