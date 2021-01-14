@@ -3,12 +3,9 @@
 @import './_mixins.scss';
 @import './_board.scss';
 
-// :root {
-//   --boardWidthFromJs: 50; 
-// }
-
 html {
-  --targetWidthFromJs: 0; 
+  --targetWidthFromJs: 0;
+  user-select: none;
 }
 
 .mainWrap {

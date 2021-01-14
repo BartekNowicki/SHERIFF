@@ -81,7 +81,7 @@ export const Sheriff: React.FC<{
             data.current.boardHeight = boardHeight;
             const sheriffWidth = Math.round(boardWidth / 4);
             data.current.sheriffWidth = sheriffWidth;
-            const deltaIncrement = sheriffWidth / 2;
+            const deltaIncrement = sheriffWidth / 8;
             data.current.deltaIncrement = deltaIncrement;
             const maxDeltaX = Math.round(boardWidth / 2 - sheriffWidth / 2);
             data.current.maxDeltaX = maxDeltaX;
